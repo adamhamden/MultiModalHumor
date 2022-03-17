@@ -14,7 +14,7 @@ from common import Modality, MissingData
 
 class Audio(Modality):
   def __init__(self, path2data='../dataset/groot/data',
-               path2outdata='../dataset/groot/data',
+               path2outdata='../PATS/data',
                speaker='all',
                preprocess_methods=['log_mel_512']):
     super(Audio, self).__init__(path2data=path2data)

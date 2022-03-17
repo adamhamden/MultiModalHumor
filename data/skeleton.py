@@ -19,7 +19,7 @@ from pycasper.pathUtils import replace_Nth_parent
 
 class Skeleton2D(Modality):
   def __init__(self, path2data='../dataset/groot/data/speech2gesture_data',
-               path2outdata='../dataset/groot/data',
+               path2outdata='../PATS/data',
                speaker='all',
                preprocess_methods=['data']):
     super(Skeleton2D, self).__init__(path2data=path2data)

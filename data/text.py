@@ -55,7 +55,7 @@ def collate_fn_pad(batch, pad_key='text/meta', dim=0):
 
 class Text(Modality):
   def __init__(self, path2data='../dataset/groot/data',
-               path2outdata='../dataset/groot/data',
+               path2outdata='../PATS/data',
                speaker='all',
                preprocess_methods=['w2v'],
                text_aligned=0):

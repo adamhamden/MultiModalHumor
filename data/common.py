@@ -102,8 +102,8 @@ class HDF5():
 
   
 class Modality(HDF5):
-  def __init__(self, path2data='../dataset/groot/data',
-               path2outdata='../dataset/groot/data',
+  def __init__(self, path2data='../PATS/data',
+               path2outdata='../PATS/data',
                speaker='all',
                preprocess_methods=['log_mel']):
     super(Modality, self).__init__()
