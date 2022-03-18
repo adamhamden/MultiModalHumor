@@ -1,61 +1,9 @@
 from data import Data
 import torch.optim as optim
 from MultiModalHumor.model import *
+from config import config, humor_speakers
 
-humor_speakers = ['oliver',  # TV sitting high_freq
-                  'jon',  # TV sitting
-                  'conan',  # TV standing high_freq
-                  'ellen',  # TV standing
-                  'seth',  # TV sitting low frequency
-                  'colbert',  # TV standing high_freq
-                  'corden',  # TV standing
-                  'fallon',  # TV standing
-                  'huckabee',  # TV standing
-                  'maher',  # TV standing
-                  'minhaj',  # TV standing
-                  'bee',  # TV standing
-                  'noah'  # TV sitting
-                  ]
-
-config = dict(context_length=4,
-              batch_size= 4,
-              classes=2,
-              learning_rate=.01,
-              epochs=10,
-              unimodal_context=dict(text_lstm_input=768,
-                                    audio_lstm_input=128,
-                                    pose_lstm_input=104,
-                                    text_lstm_hidden_size=128,
-                                    audio_lstm_hidden_size=32,
-                                    pose_lstm_hidden_size=32
-                                    ),
-              use_text=True,
-              use_audio=True,
-              use_pose=True,
-              device='cpu',
-              multimodal_context=dict(text_dropout=.1,
-                                      audio_dropout=.1,
-                                      pose_dropout=.1,
-                                      text_input=128*4,
-                                      audio_input=32*4,
-                                      pose_input=32*4,
-                                      text_mmcn_hidden_size=128,
-                                      audio_mmcn_hidden_size=32,
-                                      pose_mmcn_hidden_size=32,
-                                      d_input=192,
-                                      d_target=192,
-                                      max_length=1000,
-                                      d_model=512,
-                                      n_head=6,
-                                      n_layers=4,
-                                      d_feedforward=256,
-                                      d_key=192,
-                                      d_value=192,
-                                      dropout=.1
-                                      ),
-              )
-
-
+config = config()
 common_kwargs = dict(path2data='../PATS/data',
                      speaker=['bee'],
                      modalities=['pose/data','audio/log_mel_512'],

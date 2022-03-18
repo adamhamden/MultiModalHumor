@@ -9,12 +9,9 @@ class UnimodalContextNetwork(nn.Module):
         self.config = config
         self.device = config['device']
 
-        self.t_lstm = nn.LSTM(input_size=config['unimodal_context']['text_lstm_input'],
-                              hidden_size=config['unimodal_context']['text_lstm_hidden_size'], batch_first=True)
-        self.a_lstm = nn.LSTM(input_size=config['unimodal_context']['audio_lstm_input'],
-                              hidden_size=config['unimodal_context']['audio_lstm_hidden_size'], batch_first=True)
-        self.p_lstm = nn.LSTM(input_size=config['unimodal_context']['pose_lstm_input'],
-                              hidden_size=config['unimodal_context']['pose_lstm_hidden_size'], batch_first=True)
+        self.t_lstm = nn.LSTM(input_size=config['lstm_text_input'], hidden_size=config['lstm_text_hidden_size'], batch_first=True)
+        self.a_lstm = nn.LSTM(input_size=config['lstm_audio_input'], hidden_size=config['lstm_audio_hidden_size'], batch_first=True)
+        self.p_lstm = nn.LSTM(input_size=config['lstm_pose_input'], hidden_size=config['lstm_pose_hidden_size'], batch_first=True)
 
     def forward(self, x_t, x_a, x_p):
 
@@ -25,9 +22,9 @@ class UnimodalContextNetwork(nn.Module):
         x_a.to(self.device)
         x_p.to(self.device)
 
-        x_t = torch.reshape(x_t, (new_batch_size, seq_length, self.config['unimodal_context']['text_lstm_input']))
-        x_a = torch.reshape(x_a, (new_batch_size, seq_length, self.config['unimodal_context']['audio_lstm_input']))
-        x_p = torch.reshape(x_p, (new_batch_size, seq_length, self.config['unimodal_context']['pose_lstm_input']))
+        x_t = torch.reshape(x_t, (new_batch_size, seq_length, self.config['lstm_text_input']))
+        x_a = torch.reshape(x_a, (new_batch_size, seq_length, self.cconfig['lstm_audio_input']))
+        x_p = torch.reshape(x_p, (new_batch_size, seq_length, self.cconfig['lstm_pose_input']))
 
         if not self.config['use_text']:
             x_t = torch.zeros_like(x_t, requires_grad=True)
@@ -36,21 +33,13 @@ class UnimodalContextNetwork(nn.Module):
         if not self.config['use_pose']:
             x_p = torch.zeros_like(x_p, requires_grad=True)
 
-        text_h0 = torch.zeros(new_batch_size, self.config['unimodal_context']['text_lstm_hidden_size']).unsqueeze(0).to(
-            self.device)
-        audio_h0 = torch.zeros(new_batch_size, self.config['unimodal_context']['audio_lstm_hidden_size']).unsqueeze(
-            0).to(
-            self.device)
-        pose_h0 = torch.zeros(new_batch_size, self.config['unimodal_context']['pose_lstm_hidden_size']).unsqueeze(0).to(
-            self.device)
+        text_h0 = torch.zeros(new_batch_size, self.config['lstm_text_hidden_size']).unsqueeze(0).to(self.device)
+        audio_h0 = torch.zeros(new_batch_size, self.config['lstm_audio_hidden_size']).unsqueeze(0).to(self.device)
+        pose_h0 = torch.zeros(new_batch_size, self.config['lstm_pose_hidden_size']).unsqueeze(0).to(self.device)
 
-        text_c0 = torch.zeros(new_batch_size, self.config['unimodal_context']['text_lstm_hidden_size']).unsqueeze(0).to(
-            self.device)
-        audio_c0 = torch.zeros(new_batch_size, self.config['unimodal_context']['audio_lstm_hidden_size']).unsqueeze(
-            0).to(
-            self.device)
-        pose_c0 = torch.zeros(new_batch_size, self.config['unimodal_context']['pose_lstm_hidden_size']).unsqueeze(0).to(
-            self.device)
+        text_c0 = torch.zeros(new_batch_size, self.config['lstm_text_hidden_size']).unsqueeze(0).to(self.device)
+        audio_c0 = torch.zeros(new_batch_size, self.config['lstm_audio_hidden_size']).unsqueeze(0).to(self.device)
+        pose_c0 = torch.zeros(new_batch_size, self.config['lstm_pose_hidden_size']).unsqueeze(0).to(self.device)
 
         text_out, (text_hn, text_cn) = self.t_lstm(x_t, (text_h0, text_c0))
         audio_out, (audio_hn, audio_cn) = self.a_lstm(x_a, (audio_h0, audio_c0))
@@ -68,33 +57,37 @@ class MultimodalContextNetwork(nn.Module):
         super(MultimodalContextNetwork, self).__init__()
 
         self.config = config
+        self.device = config['device']
 
-        self.text_dropout = nn.Dropout(config['multimodal_context']['text_dropout'])
-        self.audio_dropout = nn.Dropout(config['multimodal_context']['audio_dropout'])
-        self.pose_dropout = nn.Dropout(config['multimodal_context']['pose_dropout'])
+        self.text_dropout = nn.Dropout(config['mmcn_text_dropout'])
+        self.audio_dropout = nn.Dropout(config['mmcn_audio_dropout'])
+        self.pose_dropout = nn.Dropout(config['mmcn_pose_dropout'])
 
-        self.text_fc = nn.Linear(config['multimodal_context']['text_input'],
-                                 config['multimodal_context']['text_mmcn_hidden_size'])
-        self.audio_fc = nn.Linear(config['multimodal_context']['audio_input'],
-                                  config['multimodal_context']['audio_mmcn_hidden_size'])
-        self.pose_fc = nn.Linear(config['multimodal_context']['pose_input'],
-                                 config['multimodal_context']['pose_mmcn_hidden_size'])
+        self.text_fc = nn.Linear(config['mmcn_text_input'], config['mmcn_text_hidden_size'])
+        self.audio_fc = nn.Linear(config['mmcn_audio_input'], config['mmcn_audio_hidden_size'])
+        self.pose_fc = nn.Linear(config['mmcn_pose_input'], config['mmcn_pose_hidden_size'])
 
-        self.self_attention = Transformer(d_input=config['multimodal_context']['d_input'],
-                                          d_target=config['multimodal_context']['d_target'],
-                                          max_length=config['multimodal_context']['max_length'],
-                                          d_model=config['multimodal_context']['d_model'],
-                                          n_head=config['multimodal_context']['n_head'],
-                                          n_layers=config['multimodal_context']['n_layers'],
-                                          d_feedforward=config['multimodal_context']['d_feedforward'],
-                                          d_key=config['multimodal_context']['d_key'],
-                                          d_value=config['multimodal_context']['d_value'],
-                                          dropout=config['multimodal_context']['dropout']
+        self.self_attention = Transformer(config=config,
+                                          d_input=config['transformer_src_size'],
+                                          d_target=config['transformer_tgt_size'],
+                                          max_length=config['transformer_sequence_length'],
+                                          d_model=config['d_model'],
+                                          n_heads=config['n_heads'],
+                                          n_layers=config['n_layers'],
+                                          d_feedforward=config['d_feedforward'],
+                                          d_key=config['d_key'],
+                                          d_value=config['d_value'],
+                                          dropout=config['transformer_dropout']
                                           )
 
-        self.dropout = nn.Dropout(config['multimodal_context']['dropout'])
+        self.dropout = nn.Dropout(config['mmcn_dropout'])
 
     def forward(self, text_uni, audio_uni, pose_uni):
+
+        text_uni.to(self.device)
+        audio_uni.to(self.device)
+        pose_uni.to(self.device)
+
         reshaped_text_uni = text_uni.reshape((text_uni.shape[0], -1))
         reshaped_audio_uni = audio_uni.reshape((audio_uni.shape[0], -1))
         reshaped_pose_uni = pose_uni.reshape((pose_uni.shape[0], -1))
@@ -114,13 +107,19 @@ class HumorClassifier(nn.Module):
     def __init__(self, config):
         super(HumorClassifier, self).__init__()
         self.config = config
+        self.device = config['device']
 
         self.unimodal_context = UnimodalContextNetwork(config)
         self.multimodal_context = MultimodalContextNetwork(config)
 
-        self.ff = nn.Linear(config['multimodal_context']['d_target'], 1)
+        self.ff = nn.Linear(config['transformer_tgt_size'], 1)
 
     def forward(self, x_t, x_a, x_p):
+
+        x_t.to(self.device)
+        x_a.to(self.device)
+        x_p.to(self.device)
+
         uni_t, uni_a, uni_p = self.unimodal_context(x_t, x_a, x_p)
         mcn_mem, mcn_text, mcn_audio, mcn_pose = self.multimodal_context(uni_t, uni_a, uni_p)
 
