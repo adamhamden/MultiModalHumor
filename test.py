@@ -1,9 +1,6 @@
 from data import Data
-from tqdm import tqdm
-import torch
-import torch.nn as nn
 import torch.optim as optim
-from model import *
+from MultiModalHumor.model import *
 
 humor_speakers = ['oliver',  # TV sitting high_freq
                   'jon',  # TV sitting
