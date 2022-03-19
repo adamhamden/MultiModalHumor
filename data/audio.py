@@ -13,7 +13,7 @@ import warnings
 from common import Modality, MissingData
 
 class Audio(Modality):
-  def __init__(self, path2data='../dataset/groot/data',
+  def __init__(self, path2data='../PATS/data',
                path2outdata='../PATS/data',
                speaker='all',
                preprocess_methods=['log_mel_512']):

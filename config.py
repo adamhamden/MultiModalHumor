@@ -1,7 +1,7 @@
 def config():
     batch_size = 4
     learning_rate = .01
-    epochs = 10
+    epochs = 4
     context_length = 4
     sequence_length = 64 / context_length
 

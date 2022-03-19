@@ -217,6 +217,7 @@ class Data(Modality):
         new_missing_intervals.update({'{}|{}'.format(interval, transform)})
 
     missing_intervals.update(new_missing_intervals)
+
     return missing_intervals
 
   def order_intervals(self, intervals):
@@ -266,12 +267,16 @@ class Data(Modality):
     ## get missing intervals
     missing_intervals = self.missing.load_intervals()
     missing_intervals = self.get_transforms_missing_intervals(missing_intervals)
-    
+
+    missing_intervals = list(map(lambda x: x.decode('UTF-8'), missing_intervals))
     ## get new train/dev/test intervals
-    get_intervals = lambda x: sorted(list(set(x['interval_id'].unique()) - missing_intervals))
+    get_intervals = lambda x: sorted(list(set(x['interval_id'].unique()) - set(missing_intervals)))
+
     train_intervals = get_intervals(df_train)
     dev_intervals = get_intervals(df_dev)
     test_intervals = get_intervals(df_test)
+    #print(train_intervals)
+    #print(set(missing_intervals))
 
     self.train_intervals_all = train_intervals
     self.dev_intervals_all = dev_intervals

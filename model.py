@@ -23,8 +23,8 @@ class UnimodalContextNetwork(nn.Module):
         x_p.to(self.device)
 
         x_t = torch.reshape(x_t, (new_batch_size, seq_length, self.config['lstm_text_input']))
-        x_a = torch.reshape(x_a, (new_batch_size, seq_length, self.cconfig['lstm_audio_input']))
-        x_p = torch.reshape(x_p, (new_batch_size, seq_length, self.cconfig['lstm_pose_input']))
+        x_a = torch.reshape(x_a, (new_batch_size, seq_length, self.config['lstm_audio_input']))
+        x_p = torch.reshape(x_p, (new_batch_size, seq_length, self.config['lstm_pose_input']))
 
         if not self.config['use_text']:
             x_t = torch.zeros_like(x_t, requires_grad=True)

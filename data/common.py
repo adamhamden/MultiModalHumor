@@ -232,6 +232,7 @@ class MissingData(HDF5):
       h5.close()
     else:
       intervals = set()
+
     return intervals
 
 '''
