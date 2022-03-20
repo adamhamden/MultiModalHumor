@@ -41,6 +41,7 @@ class UnimodalContextNetwork(nn.Module):
         audio_c0 = torch.zeros(new_batch_size, self.config['lstm_audio_hidden_size']).unsqueeze(0).to(self.device)
         pose_c0 = torch.zeros(new_batch_size, self.config['lstm_pose_hidden_size']).unsqueeze(0).to(self.device)
 
+
         text_out, (text_hn, text_cn) = self.t_lstm(x_t, (text_h0, text_c0))
         audio_out, (audio_hn, audio_cn) = self.a_lstm(x_a, (audio_h0, audio_c0))
         pose_out, (pose_hn, pose_cn) = self.p_lstm(x_p, (pose_h0, pose_c0))
